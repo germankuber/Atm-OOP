@@ -33,9 +33,9 @@ namespace AtmDemo
                 throw new AccountNotVerifiedException();
             }
             if (_isOpen && _isVerified)
-                deposit(amount);
+                DepositMoney(amount);
         }
-        private void deposit(decimal amount) => this._amount += amount;
+        private void DepositMoney(decimal amount) => this._amount += amount;
 
         public void WithDraw(decimal amount)
         {
@@ -50,10 +50,10 @@ namespace AtmDemo
                 throw new AccountNotVerifiedException();
             }
             if (_isOpen && _isVerified)
-                withDraw(amount);
+                WithDrawMoney(amount);
 
         }
-        private void withDraw(decimal amount)
+        private void WithDrawMoney(decimal amount)
         {
             if (amount <= this._amount)
                 this._amount -= amount;
@@ -64,7 +64,7 @@ namespace AtmDemo
             }
         }
 
-        public void HolderVirfied()
+        public void HolderVerified()
         {
             //No se puede verificar una cuenta si esta no se encuentra abierta
             if (!_isOpen)
