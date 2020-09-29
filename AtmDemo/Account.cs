@@ -12,6 +12,8 @@ namespace AtmDemo
 
         public Account(bool isVerified, bool isOpen, decimal initialAmount, string holder)
         {
+            if (initialAmount <= 0)
+                throw new AccountHasNotMoneyException();
             _isVerified = isVerified;
             _isOpen = isOpen;
             _amount = initialAmount;
