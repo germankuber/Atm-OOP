@@ -1,4 +1,5 @@
 using AtmDemo.Errors;
+
 using Xunit;
 
 namespace AtmDemo.Tests
@@ -6,12 +7,12 @@ namespace AtmDemo.Tests
 
     public class AccountTestsShould
     {
-        private Account _sut;
-        private AtmMachine _atmMachine;
+        private readonly Account _sut;
+        private readonly AtmMachine _atmMachine;
 
         public AccountTestsShould()
         {
-            _sut = new Account(false, false, 1000, "Germán Küber");
+            _sut = AccountBuilder.CreateCloseAccount(Money.Create(1000), "Germán Küber");
 
             _atmMachine = new AtmMachine(_sut);
         }
@@ -30,7 +31,7 @@ namespace AtmDemo.Tests
         public void Can_Deposit_Money()
         {
             _atmMachine.OpenAccount();
-            _atmMachine.HolderVirfied();
+            _atmMachine.HolderVerified();
             _atmMachine.Deposit(100);
             Assert.Equal(1100, _atmMachine.Summary());
         }
@@ -45,7 +46,7 @@ namespace AtmDemo.Tests
         public void Cant_WithDraw_Money_Does_Not_Have_Enough_Money()
         {
             _atmMachine.OpenAccount();
-            _atmMachine.HolderVirfied();
+            _atmMachine.HolderVerified();
             Assert.Throws<AccountHasNotMoneyException>(() => _atmMachine.WithDraw(10000));
         }
         [Fact]
@@ -58,7 +59,7 @@ namespace AtmDemo.Tests
         public void Can_WithDraw_Money()
         {
             _atmMachine.OpenAccount();
-            _atmMachine.HolderVirfied();
+            _atmMachine.HolderVerified();
             _atmMachine.WithDraw(100);
             Assert.Equal(900, _atmMachine.Summary());
         }
@@ -67,7 +68,7 @@ namespace AtmDemo.Tests
         public void Cant_Verified_Account_Is_Not_Open()
         {
             //No se puede verificar una cuenta si esta no se encuentra abierta
-            Assert.Throws<AccountClosedException>(() => _atmMachine.HolderVirfied());
+            Assert.Throws<AccountClosedException>(() => _atmMachine.HolderVerified());
         }
         [Fact]
         public void Cant_Close_Account_Has_Money()
@@ -100,7 +101,7 @@ namespace AtmDemo.Tests
         private void AccountAlreadyToOperate()
         {
             _atmMachine.OpenAccount();
-            _atmMachine.HolderVirfied();
+            _atmMachine.HolderVerified();
         }
     }
 }
