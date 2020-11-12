@@ -1,32 +1,97 @@
-﻿using AtmDemo.Errors;
+﻿using System;
+using AtmDemo.Errors;
 
 namespace AtmDemo
 {
     public class Account
     {
-        private IAccountState _accountState;
-        private Money _money;
+        private bool _isVerified = false;
+        private bool _isOpen = false;
+        private decimal _amount;
         private readonly string _holder;
 
-        internal Account(IAccountState accountState, Money money, string holder)
+        public Account(bool isVerified, bool isOpen, decimal initialAmount, string holder)
         {
-            _accountState = accountState;
-            _money = money;
+            if (initialAmount <= 0)
+                throw new AccountHasNotMoneyException();
+            _isVerified = isVerified;
+            _isOpen = isOpen;
+            _amount = initialAmount;
             _holder = holder;
         }
 
-        public decimal Summary() => _money.Amount;
+        public decimal Summary() => _amount;
 
-        public void Deposit(Money amount) =>
-            _accountState.Deposit(amount, money => _money += money);
+        public void Deposit(decimal amount)
+        {
+            if (!_isOpen)
+            {
+                Console.WriteLine("La cuenta se encuentra cerrada");
+                throw new AccountClosedException();
+            }
+            if (_isOpen && !_isVerified)
+            {
+                Console.WriteLine("La cuenta no se encuentra verificada");
+                throw new AccountNotVerifiedException();
+            }
+            if (_isOpen && _isVerified)
+                DepositMoney(amount);
+        }
+        private void DepositMoney(decimal amount) => this._amount += amount;
 
-        public void WithDraw(Money amount) =>
-            _accountState.WithDraw(amount, (money => _money -= money));
+        public void WithDraw(decimal amount)
+        {
+            if (!_isOpen)
+            {
+                Console.WriteLine("La cuenta se encuentra cerrada");
+                throw new AccountClosedException();
+            }
+            if (_isOpen && !_isVerified)
+            {
+                Console.WriteLine("La cuenta no se encuentra verificada");
+                throw new AccountNotVerifiedException();
+            }
+            if (_isOpen && _isVerified)
+                WithDrawMoney(amount);
 
-        public void HolderVerified() => _accountState = _accountState.HolderVerified();
+        }
+        private void WithDrawMoney(decimal amount)
+        {
+            if (amount <= this._amount)
+                this._amount -= amount;
+            else
+            {
+                Console.WriteLine("La cuenta no tiene suficiente dinero");
+                throw new AccountHasNotMoneyException();
+            }
+        }
 
-        public void Open() => _accountState = _accountState.Open();
-        public void Close() => _accountState = _accountState.Close(_money);
-        public AccountState State() => _accountState.State;
+        public void HolderVerified()
+        {
+            //No se puede verificar una cuenta si esta no se encuentra abierta
+            if (!_isOpen)
+                throw new AccountClosedException();
+
+            _isVerified = true;
+        }
+        public void Open()
+        {
+            _isOpen = true;
+        }
+        public void Close()
+        {
+            if (_amount > 0)
+                throw new AccountHasMoneyException();
+
+            this._isOpen = false;
+
+        }
+        public AccountState State()
+        {
+            if (_isOpen)
+                return AccountState.Open;
+
+            return AccountState.Close;
+        }
     }
 }
